@@ -2,12 +2,12 @@ const express = require("express");
 const morgan = require("morgan");
 const { createProxyMiddleware } = require("http-proxy-middleware");
 const rateLimit = require("express-rate-limit");
-const axios = require("axios");
+const { PORT } = require("./config/serverConfig");
+const { isAuthenticated, validateAuthRequest, validateFlightRequest } = require("./middlewares/request-middleware.js");
 
 const app = express();
 
-// const { PORT } = require("./config/serverConfig");
-const PORT = 3005;
+// const PORT = 3006;
 
 const limiter = rateLimit({
   windowMs: 2 * 60 * 1000, // 2 minutes
@@ -15,32 +15,27 @@ const limiter = rateLimit({
 });
 
 app.use(morgan("combined"));
-
 app.use(limiter);
 
-app.use("/bookingservice", async (req, res, next) => {
-  console.log(req.headers["x-access-token"]);
-  try {
-    const response = await axios.get("http://localhost:3002/api/v1/isAuthenticated", {
-      headers: {
-        "x-access-token": req.headers["x-access-token"],
-      },
-    });
-    if (response.data.success) {
-      next();
-    } else {
-      return res.status(401).json({
-        message: " Unauthorised ",
-      });
-    }
-  } catch (error) {
-    return res.status(error.response.status).json({
-      message: "You are not Unauthorised to access this route",
-    });
-  }
-});
+app.use(
+  "/authservice",
+  validateAuthRequest,
+  createProxyMiddleware({ target: "http://localhost:3002/", changeOrigin: true })
+);
+app.use(
+  "/bookingservice",
+  isAuthenticated,
+  createProxyMiddleware({ target: "http://localhost:3003/", changeOrigin: true })
+);
 
-app.use("/bookingservice", createProxyMiddleware({ target: "http://localhost:3003/", changeOrigin: true }));
+app.use(
+  "/searchservice",
+  validateFlightRequest,
+  createProxyMiddleware({
+    target: "http://localhost:3001/",
+    changeOrigin: true,
+  })
+);
 
 app.get("/home", (req, res) => {
   return res.json({ message: "Ok" });
