@@ -14,10 +14,16 @@ const isAuthenticated = async (req, res, next) => {
     });
     if (!authData.success) {
       return res.status(401).json({
-        message: "Unauthorized",
+        message: "Please, Login and try again",
       });
     }
-    req.id = authData.data;
+    if (authData.data.userStatus !== "Active") {
+      return res.status(401).json({
+        message: "Please , Verify your email address and try again",
+      });
+    }
+    req.id = authData.data.id;
+    console.log(authData);
     next();
   } catch (error) {
     return res.status(error.response.status || 500).json({
@@ -71,8 +77,13 @@ const validateFlightRequest = async (req, res, next) => {
   await verifyRole(req, res, next);
 };
 
+const errorHandler = (err, req, res) => {
+  console.error(err);
+  res.status(500).send("Internal server error");
+};
 module.exports = {
   isAuthenticated,
   validateAuthRequest,
   validateFlightRequest,
+  errorHandler,
 };

@@ -3,7 +3,12 @@ const morgan = require("morgan");
 const { createProxyMiddleware } = require("http-proxy-middleware");
 const rateLimit = require("express-rate-limit");
 const { PORT } = require("./config/serverConfig");
-const { isAuthenticated, validateAuthRequest, validateFlightRequest } = require("./middlewares/request-middleware.js");
+const {
+  isAuthenticated,
+  validateAuthRequest,
+  validateFlightRequest,
+  errorHandler,
+} = require("./middlewares/request-middleware.js");
 
 const app = express();
 
@@ -20,12 +25,12 @@ app.use(limiter);
 app.use(
   "/authservice",
   validateAuthRequest,
-  createProxyMiddleware({ target: "http://localhost:3002/", changeOrigin: true })
+  createProxyMiddleware({ target: "http://localhost:3002/", changeOrigin: true, onError: errorHandler })
 );
 app.use(
   "/bookingservice",
   isAuthenticated,
-  createProxyMiddleware({ target: "http://localhost:3003/", changeOrigin: true })
+  createProxyMiddleware({ target: "http://localhost:3003/", changeOrigin: true, onError: errorHandler })
 );
 
 app.use(
@@ -34,6 +39,7 @@ app.use(
   createProxyMiddleware({
     target: "http://localhost:3001/",
     changeOrigin: true,
+    onError: errorHandler,
   })
 );
 
