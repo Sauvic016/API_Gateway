@@ -23,7 +23,6 @@ const isAuthenticated = async (req, res, next) => {
       });
     }
     req.id = authData.data.id;
-    console.log(authData);
     next();
   } catch (error) {
     return res.status(error.response.status || 500).json({

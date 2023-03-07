@@ -2,6 +2,7 @@ const express = require("express");
 const morgan = require("morgan");
 const { createProxyMiddleware } = require("http-proxy-middleware");
 const rateLimit = require("express-rate-limit");
+const cors = require("cors");
 const { PORT } = require("./config/serverConfig");
 const {
   isAuthenticated,
@@ -15,10 +16,11 @@ const app = express();
 // const PORT = 3006;
 
 const limiter = rateLimit({
-  windowMs: 2 * 60 * 1000, // 2 minutes
-  max: 5, // Limit each IP to 5 requests per `window` (here, per 2 minutes)
+  windowMs: 15 * 1000, // 15 sec
+  max: 15, // Limit each IP to 15 requests per `window` (here, per 15 sec)
 });
 
+app.use(cors());
 app.use(morgan("combined"));
 app.use(limiter);
 
