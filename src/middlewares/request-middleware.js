@@ -1,7 +1,8 @@
 const axios = require("axios");
+const { AUTH_SERVICE_URL } = require("../config/serverConfig");
 
 const authService = axios.create({
-  baseURL: "http://localhost:3002/authservice/api/v1/",
+  baseURL: `${AUTH_SERVICE_URL}authservice/api/v1/`,
 });
 
 const isAuthenticated = async (req, res, next) => {

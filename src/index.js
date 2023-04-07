@@ -3,7 +3,7 @@ const morgan = require("morgan");
 const { createProxyMiddleware } = require("http-proxy-middleware");
 const rateLimit = require("express-rate-limit");
 const cors = require("cors");
-const { PORT } = require("./config/serverConfig");
+const { PORT, AUTH_SERVICE_URL, BOOKING_SERVICE_URL, SEARCH_SERVICE_URL } = require("./config/serverConfig");
 const {
   isAuthenticated,
   validateAuthRequest,
@@ -27,19 +27,19 @@ app.use(limiter);
 app.use(
   "/authservice",
   validateAuthRequest,
-  createProxyMiddleware({ target: "http://localhost:3002/", changeOrigin: true, onError: errorHandler })
+  createProxyMiddleware({ target: AUTH_SERVICE_URL, changeOrigin: true, onError: errorHandler })
 );
 app.use(
   "/bookingservice",
   isAuthenticated,
-  createProxyMiddleware({ target: "http://localhost:3003/", changeOrigin: true, onError: errorHandler })
+  createProxyMiddleware({ target: BOOKING_SERVICE_URL, changeOrigin: true, onError: errorHandler })
 );
 
 app.use(
   "/searchservice",
   validateFlightRequest,
   createProxyMiddleware({
-    target: "http://localhost:3001/",
+    target: SEARCH_SERVICE_URL,
     changeOrigin: true,
     onError: errorHandler,
   })
