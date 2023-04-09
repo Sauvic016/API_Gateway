@@ -6,7 +6,6 @@ const authService = axios.create({
 });
 
 const isAuthenticated = async (req, res, next) => {
-  // console.log(req.headers["x-access-token"]);
   try {
     const { data: authData } = await authService.get("isAuthenticated", {
       headers: {
@@ -45,9 +44,7 @@ const verifyRole = async (req, res, next) => {
       });
     }
     const { data: adminData } = await authService.get("isAdmin", {
-      data: {
-        id: authData.data,
-      },
+      data: authData.data,
     });
     if (!adminData.data) {
       return res.status(403).json({
@@ -70,7 +67,6 @@ const validateAuthRequest = async (req, res, next) => {
 };
 
 const validateFlightRequest = async (req, res, next) => {
-  console.log(req.method, req.path);
   if (req.method === "GET" && req.path !== "/api/v1/allflights") {
     return next();
   }
